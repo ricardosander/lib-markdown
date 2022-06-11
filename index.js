@@ -9,27 +9,17 @@ console.log(`
  DISK: ${chalk.yellow('70%')}   
 `);
 
-async function getFile(filePath) {
+async function extractLinkFromFiles(path) {
     const enconding = 'utf-8';
     try {
 
-        const text = await fs.promises.readFile(filePath, enconding)
-        console.log(chalk.green(text));
+        const files = await fs.promises.readdir(path, enconding)
+        console.log(chalk.green(files));
 
-        const regex = /\[([^\]]*)\]\(([^\)]*)\)/gm
-
-        const extractedLinks = [];
-
-        let curentExtractedLink;
-        while ((curentExtractedLink = regex.exec(text)) !== null) {
-            extractedLinks.push(
-                {
-                    [curentExtractedLink[1]] : curentExtractedLink[2]
-                }
-            );
-        }
-
-        console.log(extractedLinks);
+        return Promise.all(files.map(async (fileName) => {
+            const fileContent = await getFileContext(path, fileName, enconding);
+            return extractLinks(fileContent);
+        }));
 
     } catch (error) {
         throw new Error(chalk.red(error.code, 'File not found'));
@@ -38,4 +28,31 @@ async function getFile(filePath) {
     }
 }
 
-getFile('./files/file01.md');
+function getFileContext(path, fileName, enconding) {
+    const filePath = `${path}/${fileName}`
+    return fs.promises.readFile(filePath, enconding);
+}
+
+function extractLinks(text) {
+
+    const regex = /\[([^\]]*)\]\(([^\)]*)\)/gm
+
+    const extractedLinks = [];
+
+    let curentExtractedLink;
+    while ((curentExtractedLink = regex.exec(text)) !== null) {
+        extractedLinks.push(
+            {
+                [curentExtractedLink[1]]: curentExtractedLink[2]
+            }
+        );
+    }
+
+    return extractedLinks.length === 0 ? 'No links found.' : extractedLinks;
+}
+
+async function getFile(path) {
+    return extractLinkFromFiles(path);
+}
+
+export default getFile;
