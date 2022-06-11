@@ -16,12 +16,22 @@ async function extractLinkFromFiles(path) {
         const files = await fs.promises.readdir(path, enconding)
         console.log(chalk.green(files));
 
-        return Promise.all(files.map(async (fileName) => {
+        const result = await Promise.all(files.map(async (fileName) => {
+            console.log(`Extracting content from file ${fileName}`);
             const fileContent = await getFileContext(path, fileName, enconding);
-            return extractLinks(fileContent);
+            console.log(`Content extracted from file ${fileName}`);
+            const links = extractLinks(fileContent);
+            return links.map(link => {
+                return {
+                    "file": fileName,
+                    ...link
+                }
+            });
         }));
+        return result.flat();
 
     } catch (error) {
+        console.log(chalk.red(error));
         throw new Error(chalk.red(error.code, 'File not found'));
     } finally {
         console.log(chalk.yellow('Operation finished'));
@@ -43,7 +53,8 @@ function extractLinks(text) {
     while ((curentExtractedLink = regex.exec(text)) !== null) {
         extractedLinks.push(
             {
-                [curentExtractedLink[1]]: curentExtractedLink[2]
+                'name': curentExtractedLink[1],
+                'link': curentExtractedLink[2],
             }
         );
     }
