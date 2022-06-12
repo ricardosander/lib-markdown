@@ -69,7 +69,7 @@ function extractLinks(text) {
         );
     }
 
-    return extractedLinks.length === 0 ? 'No links found.' : extractedLinks;
+    return extractedLinks;
 }
 
 async function getFile(path) {
