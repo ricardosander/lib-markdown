@@ -1,14 +1,6 @@
 const chalk = require('chalk');
 const fs = require('fs');
 
-console.log(chalk.blue.bgWhite.bold("Hello Node"));
-
-console.log(`
- CPU: ${chalk.red('90%')}
- RAM: ${chalk.green('40%')}
- DISK: ${chalk.yellow('70%')}   
-`);
-
 async function extractLinkFromFiles(path) {
     const enconding = 'utf-8';
     try {
