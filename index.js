@@ -13,23 +13,14 @@ async function extractLinkFromFiles(path) {
     const enconding = 'utf-8';
     try {
 
-        const files = await fs.promises.readdir(path, enconding)
-        console.log(chalk.green(files));
+        if (isDirectory(path)) {
+            const result = await extractLinksFromFilesDirectory(path, enconding);
+            return result.flat();
+        } 
 
-        const result = await Promise.all(files.map(async (fileName) => {
-            console.log(`Extracting content from file ${fileName}`);
-            const fileContent = await getFileContext(path, fileName, enconding);
-            console.log(`Content extracted from file ${fileName}`);
-            const links = extractLinks(fileContent);
-            return links.map(link => {
-                return {
-                    "file": fileName,
-                    ...link
-                }
-            });
-        }));
+        const result = await extractFileLinks(path, enconding);
         return result.flat();
-
+        
     } catch (error) {
         console.log(chalk.red(error));
         throw new Error(chalk.red(error.code, 'File not found'));
@@ -38,8 +29,35 @@ async function extractLinkFromFiles(path) {
     }
 }
 
-function getFileContext(path, fileName, enconding) {
-    const filePath = `${path}/${fileName}`
+function isDirectory(path) {
+    return fs.lstatSync(path).isDirectory();
+}
+
+async function extractLinksFromFilesDirectory(path, enconding) {
+
+    const files = await fs.promises.readdir(path, enconding)
+    console.log(chalk.green(files));
+
+    return await Promise.all(files.map(async (fileName) => {
+        const filePath = `${path}/${fileName}`
+        console.log(`Extracting content from file ${filePath}`);
+        return await extractFileLinks(filePath, enconding);
+    }));
+}
+
+async function extractFileLinks(filePath, enconding) {
+    const fileContent = await getFileContext(filePath, enconding);
+    console.log(`Content extracted from file ${filePath}`);
+    const links = extractLinks(fileContent);
+    return links.map(link => {
+        return {
+            "file": filePath,
+            ...link
+        }
+    });
+}
+
+function getFileContext(filePath, enconding) {
     return fs.promises.readFile(filePath, enconding);
 }
 
