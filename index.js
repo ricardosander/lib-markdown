@@ -1,5 +1,5 @@
-import chalk from 'chalk';
-import fs from 'fs';
+const chalk = require('chalk');
+const fs = require('fs');
 
 console.log(chalk.blue.bgWhite.bold("Hello Node"));
 
@@ -66,4 +66,4 @@ async function getFile(path) {
     return extractLinkFromFiles(path);
 }
 
-export default getFile;
+module.exports = getFile;

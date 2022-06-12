@@ -1,4 +1,4 @@
-import fetch from "node-fetch";
+const fetch = require('node-fetch');
 
 async function validateLinks(links) {
     console.log('Validating links...');
@@ -25,4 +25,4 @@ async function validate(link) {
     };
 }
 
-export default validateLinks;
+module.exports = validateLinks;
